@@ -1,0 +1,6 @@
+apiVersion: v2
+name: ms-productos
+description: Microservicio de productos para Tito Pizzería
+type: application
+version: 0.1.0
+appVersion: "1.2"

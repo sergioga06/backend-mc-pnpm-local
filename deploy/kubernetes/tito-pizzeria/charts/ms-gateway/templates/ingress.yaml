@@ -1,0 +1,24 @@
+{{- if .Values.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tito-ms-gateway-ingress
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    # Eliminamos la línea de rewrite-target para evitar conflictos en la raíz
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/use-regex: "true"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: {{ .Values.ingress.host | quote }}
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific # <--- CAMBIA ESTO
+            backend:
+              service:
+                name: tito-ms-gateway
+                port:
+                  number: 3000
+{{- end }}

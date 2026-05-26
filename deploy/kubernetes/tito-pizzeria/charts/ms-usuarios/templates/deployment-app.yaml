@@ -1,0 +1,42 @@
+{{- if .Values.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tito-ms-usuarios-deployment
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.app.container.replicas }}
+  selector:
+    matchLabels:
+      app: tito-ms-usuarios
+  template:
+    metadata:
+      labels:
+        app: tito-ms-usuarios
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret-postgres.yaml") . | sha256sum }}
+    spec:
+      containers:
+        - name: {{ include "ms-usuarios.fullname" . }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy | default "Always" }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          env:
+            - name: MICROSERVICIO
+              value: "ms-usuarios"
+            - name: DATABASE_URL
+              # 👇 AQUÍ ESTÁ LA CORRECCIÓN: Contraseña 'admin_usuarios_pass'
+              value: "postgresql://admin:admin_usuarios_pass@tito-ms-usuarios-postgres:5432/bdusuarios?schema=public"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-token-secret
+                  key: JWT_SECRET
+          envFrom:
+            - configMapRef:
+                name: tito-ms-usuarios-config
+{{- end }}

@@ -1,0 +1,38 @@
+services:
+  # Servicio principal (Puerta de enlace)
+  ms-client-gateway:
+    profiles: ["client-gateway"] # Etiqueta para encender solo este servicio si quieres
+    build:
+      context: ${CONTEXTO} # Carpeta raíz del proyecto
+      dockerfile: ./apps/${MICROSERVICIO}/deploy/Dockerfile # La "receta" para instalarlo
+      args: # Variables usadas solo al construir la imagen
+        - CONTEXT=${CONTEXTO}
+        - MICROSERVICIO=${MICROSERVICIO}
+    container_name: tito-ms-gateway # Nombre "humano" del contenedor
+    ports:
+      - "${PORT}:3000" # Conexión: Tu Puerto PC -> Puerto Interno del contenedor
+    env_file:
+      - .env # Carga las contraseñas y configuración del archivo .env
+    volumes: 
+      - ./logs:/root/logs
+      - /root/.ssh:/root/.ssh
+    environment:
+      # --- Configuración interna ---
+      NODE_ENV: production # Modo producción (más rápido/seguro)
+      
+      # --- Conexión con otros servicios ---
+      # Le dice dónde encontrar al servicio de usuarios
+      MS_USERS_HOST: tito-ms-usuarios
+      MS_USERS_PORT: 3001
+
+      # Le dice dónde encontrar al servicio de productos
+      MS_PRODUCTS_HOST: tito-ms-productos
+      MS_PRODUCTS_PORT: 3002
+      JWT_SECRET: "antas-garrucha"
+      NATS_SERVERS: "nats://nats-server1:4222"
+
+    networks:
+      - tito-network # Se une a la red compartida para "ver" a los demás
+networks:
+  tito-network:
+    external: true # La red ya existe (no la crea de nuevo)

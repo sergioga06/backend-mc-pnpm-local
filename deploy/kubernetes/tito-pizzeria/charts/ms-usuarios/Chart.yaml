@@ -1,0 +1,9 @@
+apiVersion: v2
+name: ms-usuarios
+description: Helm chart para el microservicio de usuarios de Tito Pizzería
+type: application
+version: 0.1.0
+appVersion: "1.2" # Coincide con la versión de tu imagen jose196/tito-gateway:v1.2
+
+# He dejado las dependencias comentadas ya que estamos desplegando 
+# NATS de forma independiente en su propio namespace, lo cual es mejor práctica.

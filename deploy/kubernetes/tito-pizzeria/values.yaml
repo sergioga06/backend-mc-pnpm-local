@@ -1,0 +1,45 @@
+global:
+  # En Kubernetes no usamos localhost, usamos el nombre del servicio de NATS
+  natsServers: "nats://nats:4222" 
+  jwtSecret: "TuClaveSuperSecreta123"
+  env:
+    REPO_GIT: "https://github.com/rodriguez-22/backend-mc-pnpm.git"
+
+# 1. ACTIVAR NATS (Infraestructura)
+infra-nats:
+  enabled: true
+
+# 2. ACTIVAR USUARIOS
+ms-usuarios:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: jose196/ms-usuarios # Confirma que este es tu usuario de DockerHub
+    tag: "latest"
+  service:
+    port: 3001
+  database:
+    # Apuntamos al servicio de Postgres que crea el propio chart de usuarios
+    url: "postgresql://postgres:postgres@tito-ms-usuarios-postgres:5432/usuarios_db"
+
+# 3. ACTIVAR GATEWAY
+ms-gateway:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: jose196/ms-gateway
+    tag: "latest"
+  service:
+    port: 3000
+
+# 4. DESACTIVAR TODO LO DEMÁS (Para limpiar el panel de Argo)
+ms-auth:
+  enabled: false
+ms-productos:
+  enabled: false
+ms-orders:
+  enabled: false
+ms-tables:
+  enabled: false
+ms-qr-codes:
+  enabled: false

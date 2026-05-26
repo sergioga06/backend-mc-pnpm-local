@@ -1,0 +1,22 @@
+services:
+  nats-1:
+    image: nats:2.10-alpine
+    container_name: nats-server1
+    restart: unless-stopped
+    command:
+      - "-js"
+      - "-m"
+      - "8222"
+    ports:
+      - "4222:4222" # Cliente NATS
+      - "8222:8222" # Monitoring HTTP
+      - "6242:6242" # Clustering
+    volumes:
+      - nats_data:/data
+    networks:
+      - tito-network
+volumes:
+  nats_data:
+networks:
+  tito-network:
+    external: true

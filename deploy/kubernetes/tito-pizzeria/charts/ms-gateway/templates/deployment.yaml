@@ -1,0 +1,33 @@
+{{- if .Values.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tito-ms-gateway-deployment
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tito-ms-gateway
+  template:
+    metadata:
+      labels:
+        app: tito-ms-gateway
+    spec:
+      containers:
+        - name: tito-ms-gateway
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          # 👇 Eliminamos la carga individual de ConfigMap porque envFrom ya lo hace
+          env:
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-token-secret
+                  key: JWT_SECRET
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          # 👇 Esto inyecta TODAS las variables de tu configmap de un solo golpe
+          envFrom:
+            - configMapRef:
+                name: tito-ms-gateway-config
+{{- end }}

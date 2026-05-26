@@ -1,0 +1,22 @@
+{{- if .Values.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: nats
+  labels:
+    app: nats
+spec:
+  type: ClusterIP
+  selector:
+    app: nats
+  ports:
+    - name: client
+      port: {{ .Values.ports.client }}
+      targetPort: {{ .Values.ports.client }}
+    - name: monitoring
+      port: {{ .Values.ports.monitoring }}
+      targetPort: {{ .Values.ports.monitoring }}
+    - name: cluster
+      port: {{ .Values.ports.cluster }}
+      targetPort: {{ .Values.ports.cluster }}
+{{- end }}

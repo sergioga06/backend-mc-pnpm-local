@@ -1,0 +1,17 @@
+{{- if .Values.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: tito-ms-usuarios-postgres
+  namespace: {{ .Release.Namespace }}
+spec:
+  type: ClusterIP
+  selector:
+    # Estos selectores deben coincidir con las etiquetas del Pod de tu base de datos
+    app: tito-ms-usuarios-postgres
+  ports:
+    - name: tcp-postgres
+      protocol: TCP
+      port: {{ .Values.postgres.service.port | default 5432 }}
+      targetPort: 5432
+{{- end }}

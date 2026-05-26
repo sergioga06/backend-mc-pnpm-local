@@ -1,0 +1,49 @@
+enabled: true
+
+app:
+  image:
+    repository: "jose196/tito-ms-productos"
+    tag: "latest"
+    pullPolicy: Always
+  containerPort: 3002
+  container:
+    name: tito-ms-productos
+    replicas: 1
+
+service:
+  type: ClusterIP
+  port: 3002
+
+postgres:
+  name: tito-ms-productos-postgres
+  image:
+    repository: postgres
+    tag: "15-alpine"
+  service:
+    port: 5432
+  auth:
+    database: bdproductos
+    username: admin
+    password: admin_productos_pass
+  persistence:
+    enabled: true
+    size: 2Gi
+    storageClassName: "microk8s-hostpath"
+
+env:
+  NODE_ENV: "production"
+  NATS_SERVERS: "nats://nats:4222"
+  
+  DATABASE_HOST: "tito-ms-productos-postgres"
+  DATABASE_PORT: "5432"
+  DATABASE_NAME: "bdproductos"
+  DATABASE_USER: "admin"
+  DATABASE_PASSWORD: "admin_productos_pass"
+  DATABASE_URL: "postgresql://admin:admin_productos_pass@tito-ms-productos-postgres:5432/bdproductos?schema=public"
+  
+  DB_HOST: "tito-ms-productos-postgres"
+  DB_PORT: "5432"
+  DB_NAME: "bdproductos"
+  DB_USER: "admin"
+  DB_USERNAME: "admin"
+  DB_PASSWORD: "admin_productos_pass"

@@ -1,0 +1,53 @@
+services:
+  # --- SERVICIO 1: LA BASE DE DATOS ---
+  postgresUsuarios:
+    image: postgres:15-alpine # Usamos una versión "ligera" (Alpine) de PostgreSQL.
+    container_name: tito-ms-usuarios # Le ponemos nombre al contenedor para encontrarlo fácil.
+    env_file:
+      - .env # Le dice: "Lee las contraseñas y configuración del archivo .env".
+    environment:
+      # Aquí configuramos el usuario y contraseña que tendrá la base de datos al crearse.
+      # Usamos las variables ${...} para no escribir claves reales aquí.
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      # IMPORTANTE: Esto es el "disco duro" persistente.
+      # Si no pones esto, al apagar el contenedor perderías todos los usuarios creados.
+      # 'postgress_data' es el nombre del volumen donde se guardará todo.
+      - postgress_data:/var/lib/postgresql/data
+    ports:
+      # Conecta el puerto de tu ordenador (${DB_PORT}) con el puerto interno de la base de datos (5432).
+      - "${DB_PORT}:5432"
+    networks:
+      - tito-network # Se conecta a la red compartida del proyecto.
+
+  # --- SERVICIO 2: TU MICROSERVICIO (La App) ---
+  ms-usuarios:
+    build:
+      context: ${CONTEXTO} # Le dice dónde está la carpeta raíz del proyecto.
+      dockerfile: ./apps/${MICROSERVICIO}/deploy/Dockerfile # Le dice dónde está la "receta" (Dockerfile).
+      args:
+        # Le pasamos variables a la "receta" para que sepa qué construir.
+        - CONTEXT=${CONTEXTO}
+        - MICROSERVICIO=${MICROSERVICIO}
+    container_name: backend-mc-users # Nombre del contenedor de la aplicación.
+    # restart: unless-stopped # (Está desactivado) Si lo activas, se reinicia solo si falla.
+    ports:
+      # Abre el puerto para que puedas entrar a la app desde tu navegador/Postman.
+      - "${PORT}:${PORT}"
+    env_file:
+      - .env # Carga la configuración del entorno.
+    environment:
+      NODE_ENV: production # Le dice a Node.js que funcione en modo optimizado (Producción).
+    networks:
+      - tito-network # Se conecta a la misma red para poder "hablar" con la base de datos.
+
+# --- ZONA DE VOLÚMENES ---
+volumes:
+  postgress_data: # Aquí registramos el volumen que usamos arriba para que Docker lo cree.
+
+# --- ZONA DE REDES ---
+networks:
+  tito-network:
+    external: true # Le dice: "No crees una red nueva, usa la que ya existe llamada así".

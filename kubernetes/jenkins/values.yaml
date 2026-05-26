@@ -1,0 +1,52 @@
+# Values.yaml corregido para Jenkins Chart v5.x
+jenkins:
+  controller:
+    componentName: "jenkins-controller"
+    # CAMBIO IMPORTANTE: Estructura nueva de imagen
+    image:
+      tag: "2.541.1"
+    
+    # Política de descarga (suele ir aquí o a nivel de controller, dejémoslo aquí por seguridad)
+    imagePullPolicy: "Always"
+
+    # Seguridad
+    runAsUser: 1000
+    fsGroup: 1000
+    
+    adminUser: "admin"
+    adminPassword: "admin"
+
+    # Red
+    serviceType: "ClusterIP"
+    ingress:
+      enabled: true
+      ingressClassName: "nginx"
+      hostName: "jenkins.jrodrodriguez.es"
+      annotations:
+        kubernetes.io/ingress.class: nginx
+        nginx.ingress.kubernetes.io/ssl-redirect: "false"
+
+    # Plugins
+    installPlugins:
+      - kubernetes
+      - workflow-aggregator
+      - git
+      - github
+      - credentials-binding
+      - configuration-as-code
+      - dark-theme
+
+    sidecars:
+      configAutoReload:
+        enabled: false
+
+  # Almacenamiento
+  persistence:
+    enabled: true
+    existingClaim: "jenkins-pvc"
+    storageClass: "microk8s-hostpath"
+
+  # Service Account
+  serviceAccount:
+    create: true
+    name: "jenkins"

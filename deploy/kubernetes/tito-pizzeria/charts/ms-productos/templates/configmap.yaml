@@ -1,0 +1,14 @@
+{{- if .Values.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tito-ms-productos-config
+  namespace: {{ .Release.Namespace }}
+data:
+  NATS_SERVERS: "nats://nats.nats-system.svc.cluster.local:4222"
+  PORT: {{ .Values.global.env.PORT | quote }}
+  DATABASE_HOST: {{ .Values.env.DATABASE_HOST | quote }}
+  DATABASE_NAME: {{ .Values.env.DATABASE_NAME | quote }}
+  DATABASE_USER: {{ .Values.env.DATABASE_USER | quote }}
+  DATABASE_PORT: "5432"
+{{- end }}

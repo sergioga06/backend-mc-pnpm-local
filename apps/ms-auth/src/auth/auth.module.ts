@@ -1,0 +1,30 @@
+import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { AuthService } from './auth.service';
+import { AuthController } from './auth.controller';
+import { envs } from '../../config';
+
+@Module({
+  imports: [
+    // Cliente NATS para hablar con ms-usuarios
+    ClientsModule.register([
+      {
+        name: 'NATS_SERVICE',
+        transport: Transport.NATS,
+        options: {
+          servers: envs.natsServers,
+        },
+      },
+    ]),
+    // Configuración JWT
+    JwtModule.register({
+      global: true,
+      secret: envs.jwtSecret,
+      signOptions: { expiresIn: '2h' },
+    }),
+  ],
+  controllers: [AuthController],
+  providers: [AuthService],
+})
+export class AuthModule {}

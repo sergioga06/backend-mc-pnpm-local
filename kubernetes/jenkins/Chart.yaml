@@ -1,0 +1,10 @@
+apiVersion: v2
+name: jenkins-config  # <--- CAMBIA ESTO (Antes era 'jenkins')
+description: Jenkins CI
+type: application
+version: 0.1.0
+
+dependencies:
+  - name: jenkins     # <--- Esto déjalo igual
+    version: 5.8.7
+    repository: https://charts.jenkins.io

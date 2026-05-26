@@ -1,0 +1,20 @@
+{{- if .Values.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tito-ms-usuarios-config
+  namespace: {{ .Release.Namespace }}
+data:
+  # Apuntamos al NATS que desplegamos en nats-system
+  NATS_SERVERS: "{{ .Values.global.natsServers }}"
+  
+  # Variables de entorno para el proceso de compilación y ejecución
+  REPO_GIT: "{{ .Values.global.env.REPO_GIT }}"
+  PORT: "{{ .Values.service.port }}"
+  
+  # Configuración de Base de Datos
+  DATABASE_HOST: {{ .Values.env.DATABASE_HOST | quote }}
+  DATABASE_PORT: {{ .Values.env.DATABASE_PORT | quote }}
+  DATABASE_NAME: {{ .Values.env.DATABASE_NAME | quote }}
+  DATABASE_USER: {{ .Values.env.DATABASE_USER | quote }}
+{{- end }}

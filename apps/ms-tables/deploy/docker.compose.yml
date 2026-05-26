@@ -1,0 +1,9 @@
+db-tables:
+    image: postgres:15-alpine
+    container_name: db-tables
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: db_tables
+    ports:
+      - "5436:5432" # Puerto externo 5436

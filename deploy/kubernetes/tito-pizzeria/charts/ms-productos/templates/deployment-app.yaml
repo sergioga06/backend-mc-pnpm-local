@@ -1,0 +1,33 @@
+{{- if .Values.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tito-ms-productos-deployment
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.app.container.replicas }}
+  selector:
+    matchLabels:
+      app: tito-ms-productos
+  template:
+    metadata:
+      labels:
+        app: tito-ms-productos
+    spec:
+      containers:
+        - name: tito-ms-productos
+          image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag }}"
+          imagePullPolicy: {{ .Values.app.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.app.containerPort }}
+          env:
+            - name: MICROSERVICIO
+              value: "ms-productos"
+            # Mantenemos DATABASE_URL porque usa la interpolación $(DATABASE_PASSWORD)
+            - name: DATABASE_URL
+              value: "postgresql://{{ .Values.postgres.auth.username }}:$(DATABASE_PASSWORD)@{{ .Values.postgres.name }}:5432/{{ .Values.postgres.auth.database }}"
+            # 👇 ¡EL BLOQUE DE DATABASE_PASSWORD SE HA ELIMINADO DE AQUÍ! 👇
+          envFrom:
+            - configMapRef:
+                name: tito-ms-productos-config
+{{- end }}

@@ -1,0 +1,25 @@
+enabled: true
+
+image:
+  repository: nats
+  tag: 2.10-alpine
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+
+jetstream:
+  enabled: true
+
+ports:
+  client: 4222
+  monitoring: 8222
+  cluster: 6222
+
+persistence:
+  enabled: true
+  size: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""   # ⚠️ IMPORTANTE (ver MicroK8s/K3s abajo)
+
+resources: {}

@@ -1,0 +1,16 @@
+{{- if .Values.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tito-ms-gateway-config
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  # 👇 CAMBIO AQUÍ: Usamos la variable global o ponemos "nats://nats:4222"
+  NATS_SERVERS: "{{ .Values.global.natsServers }}"
+  REPO_GIT: {{ .Values.global.env.REPO_GIT | quote }}
+  PORT: "3000"
+  MS_USERS_HOST: "tito-ms-users-service"
+  MS_USERS_PORT: "3000"
+  MS_PRODUCTS_HOST: "tito-ms-products-service"
+  MS_PRODUCTS_PORT: "3000"
+{{- end }}

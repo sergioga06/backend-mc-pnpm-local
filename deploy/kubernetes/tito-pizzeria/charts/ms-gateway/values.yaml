@@ -1,0 +1,23 @@
+app:
+  image:
+    repository: "jose196/tito-gateway"
+    tag: "v1.2"  # (o "latest" si la subiste así)
+    pullPolicy: "Always"
+  containerPort: 3000
+  env:
+    NATS_SERVERS: "nats://nats:4222"
+    PORT: "3000"
+    # 👇 ESTA ES LA LÍNEA QUE SALVARÁ AL GATEWAY 👇
+    REPO_GIT: "https://github.com/Rodriguez-22/backend-mc-pnpm.git"
+
+service:
+  type: NodePort
+  port: 3000
+  nodePort: 30080
+
+ingress:
+  enabled: true
+  className: nginx
+  host: api.jrodrodriguez.es
+  path: /
+  pathType: ImplementationSpecific

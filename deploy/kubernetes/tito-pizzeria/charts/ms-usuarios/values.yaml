@@ -1,0 +1,55 @@
+enabled: true
+
+app:
+  image:
+    repository: "jose196/tito-ms-usuarios"
+    tag: "latest"
+    pullPolicy: Always
+  containerPort: 3001
+  container:
+    name: tito-ms-usuarios
+    replicas: 1
+
+service:
+  type: ClusterIP
+  port: 3001
+
+postgres:
+  name: tito-ms-usuarios-postgres
+  image:
+    repository: postgres
+    tag: "15-alpine"
+  service:
+    port: 5432
+  auth:
+    database: bdusuarios
+    username: admin
+    password: admin_usuarios_pass
+  persistence:
+    enabled: true
+    size: 2Gi
+    storageClassName: "microk8s-hostpath"
+
+# 
+
+env:
+  NODE_ENV: "production"
+  PORT: "3001"
+  REPO_GIT: "https://github.com/Rodriguez-22/backend-mc-pnpm.git"
+  NATS_SERVERS: "nats://nats:4222"
+  
+  # 👇 VARIABLES FIJADAS (Para que el ConfigMap no salga vacío) 👇
+  DATABASE_HOST: "tito-ms-usuarios-postgres"
+  DATABASE_PORT: "5432"
+  DATABASE_NAME: "bdusuarios"
+  DATABASE_USER: "admin"
+  DATABASE_PASSWORD: "admin_usuarios_pass"
+  DATABASE_URL: "postgresql://admin:admin_usuarios_pass@tito-ms-usuarios-postgres:5432/bdusuarios?schema=public"
+
+  # 👇 VARIABLES DE VALIDACIÓN (Prefijo DB_) 👇
+  DB_HOST: "tito-ms-usuarios-postgres"
+  DB_PORT: "5432"
+  DB_NAME: "bdusuarios"
+  DB_USER: "admin"
+  DB_USERNAME: "admin"
+  DB_PASSWORD: "admin_usuarios_pass"

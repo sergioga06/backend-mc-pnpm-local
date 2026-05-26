@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  ms-productos:
+    build:
+      context: ../../../
+      dockerfile: apps/ms-productos/deploy/Dockerfile
+    container_name: ms-productos
+    environment:
+      - PORT=${PORT}
+      - DATABASE_URL=${DATABASE_URL}
+      - NATS_SERVERS=${NATS_SERVERS}
+
+  # --- MICROSERVICIO (TU CÓDIGO) ---
+  ms-productos:
+    build:
+      context: ../../../ # Sube 3 niveles para ver todo el proyecto
+      dockerfile: ./apps/ms-productos/deploy/Dockerfile # La receta de instalación
+      args:
+        - MICROSERVICIO=ms-productos # Le dice qué carpeta compilar
+    container_name: tito-ms-productos
+    ports:
+      - "3002:3002" # Accesible en localhost:3002
+    env_file:
+      - .env # Carga las contraseñas y configuración del archivo .env
+    environment:
+      # ¡IMPORTANTE! Aquí le decimos cómo conectar con SU base de datos.
+      # Fíjate que usa 'postgres-products' (el nombre del contenedor de arriba) como dirección.
+      PORT: 3002
+      DB_NAME: db_products
+      DB_PORT: 5434
+      DB_USERNAME: admin
+      DB_PASSWORD: admin
+      DB_HOST: postgres-products
+      MS_PRODUCTS_PORT: 3002
+      DATABASE_URL: postgresql://admin:admin@postgres-products:5432/db_products
+      NATS_SERVERS: "nats://nats-server1:4222" # <--- ¡ESTA ES VITAL!
+      NODE_ENV: production
+    depends_on:
+      - db-products # Espera a que la BD arranque antes de iniciarse él
+    networks:
+      - tito-network
+
+# Configuración extra (volúmenes y redes)
+volumes:
+  postgres_data:
+
+networks:
+  tito-network:
+    external: true # Usa la red que creamos manualmente al principio

@@ -1,0 +1,14 @@
+apiVersion: v2
+name: tito-pizzeria
+type: application
+version: 0.1.0
+
+dependencies:
+  - name: ms-gateway
+    version: 0.1.0    # <-- Asegúrate que coincida con su propio Chart.yaml
+  - name: ms-productos
+    version: 0.1.0    # <-- ¡Pon aquí la versión exacta que tenga su Chart.yaml!
+  - name: ms-usuarios
+    version: 0.1.0    # <-- ¡Pon aquí la versión exacta que tenga su Chart.yaml!
+  - name: infra-nats
+    version: 0.1.0
