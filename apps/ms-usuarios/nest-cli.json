@@ -3,6 +3,13 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "webpack": true,
+    "externalDependencies": [
+      "@nestjs/microservices",
+      "@nestjs/nats",
+      "nats",
+      "@prisma/client"
+    ]
   }
 }

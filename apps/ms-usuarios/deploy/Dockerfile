@@ -1,34 +1,27 @@
 FROM node:20-alpine
 
-# Argumentos
-ARG MICROSERVICIO
-ENV MICROSERVICIO=${MICROSERVICIO}
+# Instalamos openssl que requiere Prisma
+RUN apk update && apk add --no-cache bash openssl
 
-# 1. Instalamos herramientas
-RUN apk update && apk add --no-cache bash git openssh-client \
-    && npm install -g pnpm pm2
-
-# 2. Directorio de trabajo
 WORKDIR /app
 
-# 3. Copiamos TODO el código fuente
-COPY . .
+# Copiamos la configuración del monorepo
+COPY package.json pnpm-workspace.yaml ./
+COPY apps/ms-usuarios/package.json ./apps/ms-usuarios/
+COPY apps/ms-usuarios/prisma ./apps/ms-usuarios/prisma
 
-# 4. Instalamos las dependencias
-RUN pnpm install
+# IMPORTANTE: Eliminamos el uso de pnpm en Docker. 
+# Usamos NPM para crear un árbol de dependencias PLANO (sin symlinks)
+RUN npm install -g npm@latest
+RUN cd apps/ms-usuarios && npm install --omit=dev
 
-# 5. 🛑 FIX: Generamos el cliente de Prisma ANTES de compilar
-RUN npx prisma generate --schema=apps/ms-usuarios/prisma/schema.prisma
+# Instalamos el CLI de Prisma e inicializamos
+RUN cd apps/ms-usuarios && npm install prisma --no-save
+RUN cd apps/ms-usuarios && npx prisma generate
 
-# 6. 🟢 AHORA SÍ: Compilamos el código de NestJS
-RUN pnpm run build ${MICROSERVICIO}
-
-# 7. Movemos y preparamos el script de arranque
-RUN cp apps/${MICROSERVICIO}/deploy/start.sh /usr/local/bin/start-app.sh && \
-    chmod +x /usr/local/bin/start-app.sh && \
-    sed -i 's/\r$//' /usr/local/bin/start-app.sh
+# Copiamos el código de NestJS
+COPY dist/apps/ms-usuarios ./dist/apps/ms-usuarios
 
 EXPOSE 3001
 
-# 8. Ejecución
-CMD [ "bash", "/usr/local/bin/start-app.sh" ]
+CMD ["node", "dist/apps/ms-usuarios/main.js"]

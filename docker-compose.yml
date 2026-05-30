@@ -1,0 +1,92 @@
+name: tito-pizzeria-local
+
+services:
+  # 1. Servidor de Mensajería Central (NATS)
+  nats-server:
+    image: nats:alpine
+    container_name: tito-nats
+    ports:
+      - "4222:4222"
+    networks:
+      - tito-local-network
+
+  # 2. Base de Datos para el Microservicio de Usuarios
+  db-users:
+    image: postgres:15-alpine
+    container_name: postgres-users
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: db_users
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_users_data:/var/lib/postgresql/data
+    networks:
+      - tito-local-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d db_users"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 3. Microservicio de Usuarios (NestJS)
+  ms-usuarios:
+    build:
+      context: .
+      dockerfile: apps/ms-usuarios/deploy/Dockerfile
+    image: tito-local/ms-usuarios:latest
+    container_name: tito-ms-usuarios
+    restart: always
+    environment:
+      PORT: 3001
+      NATS_SERVERS: "nats://nats-server:4222"
+      DATABASE_URL: "postgresql://admin:admin@db-users:5432/db_users?schema=public"
+      JWT_SECRET: "jsUVLlM22lZndNMG/czSwg9dgNNS3/622IyBJJOm8Tvn8="
+    ports:
+      - "3001:3001"
+    depends_on:
+      db-users:
+        condition: service_healthy
+      nats-server:
+        condition: service_started
+    networks:
+      - tito-local-network
+
+  # 4. API Gateway (Punto de entrada HTTP)
+  ms-gateway:
+    build:
+      context: .
+      dockerfile: apps/ms-client-gateway/deploy/Dockerfile
+    image: tito-local/ms-gateway:latest
+    container_name: tito-ms-gateway
+    restart: always
+    environment:
+      PORT: 3000
+      NATS_SERVERS: "nats://nats-server:4222"
+      JWT_SECRET: "jsUVLlM22lZndNMG/czSwg9dgNNS3/622IyBJJOm8Tvn8="
+      
+      # Variables Obligatorias para Joi
+      MS_USERS_HOST: "ms-usuarios"
+      MS_USERS_PORT: "3001"
+      MS_PRODUCTS_HOST: "localhost"
+      MS_PRODUCTS_PORT: "3002"
+      MS_ORDERS_HOST: "localhost"
+      MS_ORDERS_PORT: "3003"
+      MS_TABLES_HOST: "localhost"
+      MS_TABLES_PORT: "3004"
+    ports:
+      - "3000:3000"
+    depends_on:
+      nats-server:
+        condition: service_started
+    networks:
+      - tito-local-network
+
+networks:
+  tito-local-network:
+    driver: bridge
+
+volumes:
+  db_users_data:

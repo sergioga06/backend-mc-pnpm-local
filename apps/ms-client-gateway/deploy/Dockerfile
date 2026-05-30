@@ -1,31 +1,17 @@
 FROM node:20-alpine
 
-# Argumentos
-ARG MICROSERVICIO
-ENV MICROSERVICIO=${MICROSERVICIO}
+RUN apk update && apk add --no-cache bash
 
-# 1. Instalamos herramientas
-RUN apk update && apk add --no-cache bash git openssh-client \
-    && npm install -g pnpm pm2
-
-# 2. Directorio de trabajo
 WORKDIR /app
 
-# 3. Copiamos TODO el código fuente de tu proyecto hacia el contenedor
-COPY . .
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/ms-client-gateway/package.json ./apps/ms-client-gateway/
 
-# 4. Instalamos las dependencias DENTRO de Docker
-RUN pnpm install
+RUN npm install -g pnpm && \
+    pnpm install --prod --frozen-lockfile --ignore-scripts
 
-# 5. Compilamos el código de NestJS (esto genera la carpeta /dist automáticamente)
-RUN pnpm run build ${MICROSERVICIO}
-
-# 6. Movemos y preparamos el script de arranque
-RUN cp apps/${MICROSERVICIO}/deploy/start.sh /usr/local/bin/start-app.sh && \
-    chmod +x /usr/local/bin/start-app.sh && \
-    sed -i 's/\r$//' /usr/local/bin/start-app.sh
+COPY dist/apps/ms-client-gateway ./dist/apps/ms-client-gateway
 
 EXPOSE 3000
 
-# 7. Ejecución
-CMD [ "bash", "/usr/local/bin/start-app.sh" ]
+CMD ["node", "dist/apps/ms-client-gateway/main.js"]
