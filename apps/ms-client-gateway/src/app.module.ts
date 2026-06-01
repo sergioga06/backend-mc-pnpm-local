@@ -4,7 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 // 1. Importar las constantes de nombres
-import { MS_USERS, MS_PRODUCTS } from './config/service'; 
+import { MS_USERS, MS_PRODUCTS, MS_QRCODES, MS_ORDERS} from './config/service'; 
 
 // 2. Importar los controladores de PRODUCTOS
 import { GatewayProductosController } from './modulos/ms-productos/productos.controller';
@@ -19,34 +19,47 @@ import { GestionPermisosController } from './modulos/ms-usuarios/permisos.contro
 import { MS_TABLES } from './config/service';
 import { GatewayTablesController } from './modulos/ms-tables/tables.controller';
 import { envs } from './config';
+import { GatewayQrController } from './modulos/ms-qr-codes/qr-code.controller';
+import { GatewayOrdersController } from './modulos/ms-orders/orders.controller';
 @Module({
   imports: [
     // 👇 AQUÍ ESTÁ LA CLAVE: Registramos los clientes TCP
     ClientsModule.register([
       {
-        name: MS_USERS, // 'MS_USERS'
+        name: MS_USERS,
         transport: Transport.NATS,
         options: {
           servers: envs.natsServers
         },
       },
       {
-        name: MS_PRODUCTS, // 'MS_PRODUCTS' <-- Esto es lo que faltaba
-        transport: Transport.TCP,
+        name: MS_PRODUCTS, 
+        transport: Transport.NATS, // <-- CAMBIAR DE TCP A NATS
         options: {
-          host: process.env.MS_PRODUCTS_HOST || 'localhost',
-          port: parseInt(process.env.MS_PRODUCTS_PORT || '3002'),
+          servers: envs.natsServers // <-- USAR NATS EN LUGAR DE HOST/PORT
         },
-      
       },
       {
         name: MS_TABLES,
-        transport: Transport.TCP,
+        transport: Transport.NATS,
         options: {
-          host: process.env.MS_TABLES_HOST || 'localhost',
-          port: parseInt(process.env.MS_TABLES_PORT || '3003'),
+          servers: envs.natsServers
         },
       },
+      {
+        name: MS_QRCODES, // (O la constante que uses)
+        transport: Transport.NATS, // 👈 Forzar NATS
+        options: {
+          servers: envs.natsServers
+        },
+      },
+      {
+        name: MS_ORDERS,
+        transport: Transport.NATS,
+        options: {
+          servers: envs.natsServers
+        },
+      }
     ]),
   ],
   controllers: [
@@ -62,7 +75,13 @@ import { envs } from './config';
     GestionPermisosController,
 
     // Controladores de Tables
-    GatewayTablesController
+    GatewayTablesController,
+
+    // Controladores de QR Codes
+    GatewayQrController,
+
+    // Controladores de Orders
+    GatewayOrdersController
   ],
   providers: [AppService],
 })

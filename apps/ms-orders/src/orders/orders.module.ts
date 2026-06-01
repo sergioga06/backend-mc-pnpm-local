@@ -8,14 +8,17 @@ import { Order, OrderItem } from '@app/common';
 @Module({
   imports: [
     TypeOrmModule.forFeature([Order, OrderItem]),
-    ClientsModule.register([
+    ClientsModule.registerAsync([
       {
-        name: 'PRODUCT_SERVICE', // Nombre interno para el servicio de productos
-        transport: Transport.TCP,
-        options: {
-          host: process.env.MS_PRODUCTS_HOST || 'localhost',
-          port: 3002, // Puerto del ms-productos
-        },
+        name: 'PRODUCT_SERVICE',
+        useFactory: () => ({
+          transport: Transport.NATS, // 👈 Ahora hablamos el mismo idioma
+          options: {
+            servers: process.env.NATS_SERVERS 
+              ? process.env.NATS_SERVERS.split(',') 
+              : ['nats://127.0.0.1:4222'],
+          },
+        }),
       },
     ]),
   ],

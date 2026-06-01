@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import * as Joi from 'joi';
 import * as dotenv from 'dotenv';
-dotenv.config({ path: 'deploy/.env' });
+dotenv.config();
 
 
 interface EnvVars {

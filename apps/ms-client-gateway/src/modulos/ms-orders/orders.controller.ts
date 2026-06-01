@@ -3,7 +3,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { CreateOrderDto } from '@app/common';
 import { MS_ORDERS } from '../../config/service'; // O usa el string 'MS_ORDERS'
 
-@Controller('pedidos')
+@Controller('gestion/pedidos')
 export class GatewayOrdersController {
   constructor(@Inject(MS_ORDERS) private readonly ordersClient: ClientProxy) {}
 

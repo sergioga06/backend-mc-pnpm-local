@@ -1,4 +1,6 @@
-import 'dotenv/config';
+import * as dotenv from 'dotenv';
+dotenv.config({ path: 'apps/ms-client-gateway/.env' }); // Le decimos la ruta exacta desde la raíz
+
 import * as joi from 'joi';
 import { env } from 'process';
 

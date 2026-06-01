@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
+import { envs } from './config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -22,7 +23,7 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(3000);
-  logger.log('🚀 Gateway escuchando peticiones en el puerto 3000');
+  await app.listen(envs.port);
+  logger.log(`🚀 Gateway escuchando peticiones en el puerto ${envs.port}`);
 }
 bootstrap();
