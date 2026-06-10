@@ -34,4 +34,8 @@ export class CreateProductDto {
   @IsArray()
   @IsUUID('4', { each: true }) // ✅ Validamos que sean IDs válidos
   allergenIds?: string[];      // ✅ Renombrado para coincidir con el servicio
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  ingredientIds?: string[];
 }

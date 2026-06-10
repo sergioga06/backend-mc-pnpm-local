@@ -22,27 +22,47 @@ export class OrdersService {
     let totalAmount = 0;
     const orderItems: OrderItem[] = [];
 
-    // 1. Validar productos y obtener precios reales desde ms-productos
+    // 1. Validar productos y obtener precios
     for (const item of items) {
-      // Enviamos el comando al ms-productos
       const product = await firstValueFrom(
         this.productClient.send({ cmd: 'find_one_product' }, item.productId)
       );
 
       if (product) {
+        let unitPrice = product.price; // Empezamos con el precio base (ej. 9.50)
+
+        // 👇 LA MAGIA MATEMÁTICA: Calcular coste de ingredientes extra
+        if (item.customizations && item.customizations.added && item.customizations.added.length > 0) {
+          try {
+            // Viajamos por NATS a ms-productos para preguntar cuánto cuestan estos extras
+            const extras = await firstValueFrom(
+              this.productClient.send({ cmd: 'get_ingredients_prices' }, item.customizations.added)
+            );
+            
+            // Sumamos el coste extra de cada ingrediente (ej. +1.50 del Bacon)
+            const extrasCost = extras.reduce((sum, extra) => sum + (extra.extraPrice || 0), 0);
+            unitPrice += extrasCost; 
+          } catch (error) {
+            this.logger.error(`Error calculando el precio de los extras: ${error.message}`);
+          }
+        }
+
+        // 2. Crear la línea de la factura
         const orderItem = this.orderItemRepository.create({
           productId: product.id,
           productName: product.name,
-          price: product.price,
+          price: unitPrice, // 👈 Guardamos el precio final (Base + Extras)
           quantity: item.quantity,
+          customizations: item.customizations, // 👈 Guardamos el JSON de { added: [...], removed: [...] }
         });
         
-        totalAmount += product.price * item.quantity;
+        // El total del ticket multiplica el precio final por la cantidad de hamburguesas
+        totalAmount += unitPrice * item.quantity;
         orderItems.push(orderItem);
       }
     }
 
-    // 2. Crear la cabecera del pedido
+    // 3. Crear la cabecera del pedido
     const order = this.orderRepository.create({
       tableId,
       userId,

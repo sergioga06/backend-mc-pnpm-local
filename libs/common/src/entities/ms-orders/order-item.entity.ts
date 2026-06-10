@@ -18,6 +18,12 @@ export class OrderItem {
   @Column('int')
   quantity: number;
 
+  @Column({ type: 'jsonb', nullable: true })
+  customizations: {
+    added?: string[]; // UUIDs de los ingredientes extra
+    removed?: string[]; // UUIDs de los ingredientes quitados
+  };
+
   @ManyToOne(() => Order, (order) => order.items)
   order: Order;
 }

@@ -9,8 +9,7 @@ async function bootstrap() {
 
   // 👇 ESTA ES LA PIEZA QUE FALTA 👇
   app.enableCors({
-    // Permitimos específicamente tu frontend local
-    origin: 'http://95.111.225.241:32033', 
+    origin: '*', // El asterisco significa "dejar entrar a cualquier frontend"
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });

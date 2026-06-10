@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, ManyToMany, JoinTable } from 'typeorm';
 import { Category } from './categoria.entity';
 import { Allergen } from './alergeno.entity';
+import { Ingredient } from './ingrediente.entity';
 
 @Entity('products')
 export class Product {
@@ -33,4 +34,9 @@ export class Product {
   @ManyToMany(() => Allergen, (allergen) => allergen.products)
   @JoinTable()
   allergens: Allergen[];
+
+  // 👇 NUEVA RELACIÓN: Los ingredientes que componen este producto por defecto
+  @ManyToMany(() => Ingredient, (ingredient) => ingredient.products)
+  @JoinTable()
+  ingredients: Ingredient[];
 }

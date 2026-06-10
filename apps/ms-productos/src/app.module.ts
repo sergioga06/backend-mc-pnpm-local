@@ -13,6 +13,7 @@ import { AlergenosModule } from './alergenos/alergenos.module';
 import { Product } from '../../../libs/common/src/entities/ms-productos/productos.entity';
 import { Category } from '../../../libs/common/src/entities/ms-productos/categoria.entity';
 import { Allergen } from '../../../libs/common/src/entities/ms-productos/alergeno.entity';
+import { Ingredient } from '../../../libs/common/src/entities/ms-productos/ingrediente.entity';
 
 @Module({
   imports: [
@@ -39,7 +40,7 @@ import { Allergen } from '../../../libs/common/src/entities/ms-productos/alergen
       synchronize: true, 
       
       // Aquí listamos las tablas específicas que vamos a usar.
-      entities: [Product, Category, Allergen],
+      entities: [Product, Category, Allergen, Ingredient],
     }),
 
     // 3. MÓDULOS DE FUNCIONALIDAD
