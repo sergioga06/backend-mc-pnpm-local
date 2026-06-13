@@ -155,4 +155,22 @@ export class UsersService {
       throw error;
     }
   }
+  // 7. VALIDAR CREDENCIALES (Exclusivo para Login)
+  async validateUserCredentials(email: string, pass: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      include: { roles: true } // Traemos los roles para el Token
+    });
+
+    // Si el usuario no existe, rechazamos
+    if (!user) return null;
+
+    // Comparamos la contraseña plana con el hash de la BD usando bcrypt
+    const isMatch = await bcrypt.compare(pass, user.password);
+    if (!isMatch) return null;
+
+    // Si todo cuadra, limpiamos la contraseña y devolvemos el usuario
+    const { password, ...result } = user;
+    return result;
+  }
 }

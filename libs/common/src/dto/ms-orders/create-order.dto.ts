@@ -1,16 +1,16 @@
-import { IsUUID, IsArray, ValidateNested, IsInt, Min, IsOptional } from 'class-validator';
+import { IsUUID, IsArray, ValidateNested, IsInt, Min, IsOptional, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 
 // 1. Añadimos el validador para las customizaciones
 class OrderItemCustomizationDto {
+@IsOptional()
   @IsArray()
-  @IsUUID('4', { each: true })
-  @IsOptional()
+  @IsString({ each: true }) // <- AHORA ACEPTARÁ TEXTO NORMAL ("Bacon", "Cebolla")
   added?: string[];
 
-  @IsArray()
-  @IsUUID('4', { each: true })
   @IsOptional()
+  @IsArray()
+  @IsString({ each: true }) 
   removed?: string[];
 }
 

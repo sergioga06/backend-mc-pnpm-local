@@ -20,7 +20,7 @@ export class Product {
   @Column('text', { nullable: true })
   image: string;
 
-  @Column('bool', { default: true }) // Este lo dejamos, es útil (se pone true solo)
+  @Column('bool', { default: true }) 
   isActive: boolean;
 
   // --- Relaciones ---
@@ -35,8 +35,11 @@ export class Product {
   @JoinTable()
   allergens: Allergen[];
 
-  // 👇 NUEVA RELACIÓN: Los ingredientes que componen este producto por defecto
   @ManyToMany(() => Ingredient, (ingredient) => ingredient.products)
   @JoinTable()
   ingredients: Ingredient[];
+
+  // 👇 EL NUEVO ADN: Guardará los extras específicos de este plato y su precio
+  @Column({ type: 'jsonb', nullable: true, default: [] })
+  extras: { name: string, price: number }[];
 }

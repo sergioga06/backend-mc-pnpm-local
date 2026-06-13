@@ -50,4 +50,9 @@ export class UsersController {
   remove(@Payload() id: string) { //  id es string
     return this.usersService.remove(id);
   }
+  // 7. VALIDAR CREDENCIALES
+  @MessagePattern({ cmd: 'validate_credentials' })
+  validateCredentials(@Payload() data: any) {
+    return this.usersService.validateUserCredentials(data.email, data.password);
+  }
 }

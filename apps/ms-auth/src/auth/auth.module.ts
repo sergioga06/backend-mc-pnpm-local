@@ -3,26 +3,22 @@ import { JwtModule } from '@nestjs/jwt';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { envs } from '../../config';
 
 @Module({
   imports: [
-    // Cliente NATS para hablar con ms-usuarios
+    // La máquina de hacer Tokens
+    JwtModule.register({
+      secret: 'SECRETO_SUPER_SEGURO_TITO_2026', // En producción, esto irá en el .env
+      signOptions: { expiresIn: '8h' }, // El token caduca en 8 horas
+    }),
+    // Conexión con el validador (ms-usuarios)
     ClientsModule.register([
       {
-        name: 'NATS_SERVICE',
+        name: 'MS_USUARIOS',
         transport: Transport.NATS,
-        options: {
-          servers: envs.natsServers,
-        },
+        options: { servers: ['nats://localhost:4222'] },
       },
     ]),
-    // Configuración JWT
-    JwtModule.register({
-      global: true,
-      secret: envs.jwtSecret,
-      signOptions: { expiresIn: '2h' },
-    }),
   ],
   controllers: [AuthController],
   providers: [AuthService],

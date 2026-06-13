@@ -126,13 +126,13 @@ export class ProductosService {
     return await this.productRepository.save(product);
   }
 
-  // 👇 NUEVO: Método para buscar rápidamente cuánto cuestan los ingredientes extra
-  async findIngredientsPrices(ids: string[]) {
-    if (!ids || ids.length === 0) return [];
+  // 👇 ARREGLADO: Ahora busca por nombres (name: In(names)) en lugar de por IDs
+  async findIngredientsPrices(names: string[]) {
+    if (!names || names.length === 0) return [];
     
     return await this.ingredientRepository.find({
-      where: { id: In(ids) },
-      select: ['id', 'extraPrice'] // Solo extraemos el precio por eficiencia
+      where: { name: In(names) },
+      select: ['id', 'name', 'extraPrice'] // Traemos el nombre también para evitar errores de mapeo en TypeORM
     });
   }
 

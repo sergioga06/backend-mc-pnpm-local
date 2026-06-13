@@ -7,10 +7,18 @@ export class Ingredient {
   id: string;
 
   @Column('text', { unique: true })
-  name: string; // ej: "Queso Extra", "Cebolla", "Bacon"
+  name: string; 
+
+  // 👇 AÑADIDO: La descripción que estamos mandando desde el frontend
+  @Column('text', { nullable: true })
+  description: string;
 
   @Column('float', { default: 0 })
-  extraPrice: number; // ¿Cuánto cuesta añadirlo como extra? (0 si quitarlo no resta precio)
+  extraPrice: number; 
+
+  // 👇 AÑADIDO: Vital para que el servicio pueda hacer el borrado lógico y buscar activos
+  @Column('bool', { default: true })
+  isActive: boolean;
 
   @ManyToMany(() => Product, (product) => product.ingredients)
   products: Product[];

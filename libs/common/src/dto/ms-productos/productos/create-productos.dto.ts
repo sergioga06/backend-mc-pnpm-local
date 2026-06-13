@@ -32,10 +32,16 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsArray()
-  @IsUUID('4', { each: true }) // ✅ Validamos que sean IDs válidos
-  allergenIds?: string[];      // ✅ Renombrado para coincidir con el servicio
+  @IsUUID('4', { each: true }) 
+  allergenIds?: string[];      
+
   @IsOptional()
   @IsArray()
   @IsUUID('4', { each: true })
   ingredientIds?: string[];
+
+  // 👇 PERMISO DE ENTRADA: Le decimos a NestJS que acepte la lista de extras
+  @IsOptional()
+  @IsArray()
+  extras?: { name: string, price: number }[];
 }

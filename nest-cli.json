@@ -56,13 +56,13 @@
       }
     },
     "ms-auth": {
-      "type": "application", 
+      "type": "application",
       "root": "apps/ms-auth",
       "entryFile": "main",
       "sourceRoot": "apps/ms-auth/src",
       "compilerOptions": {
         "webpack": true,
-        "tsConfigPath": "apps/ms-auth/tsconfig.json"
+        "tsConfigPath": "apps/ms-auth/tsconfig.app.json"
       }
     },
     "ms-qr-codes": {

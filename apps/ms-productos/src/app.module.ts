@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductosModule } from './productos/productos.module';
 import { CategoriasModule } from './categorias/categorias.module';
 import { AlergenosModule } from './alergenos/alergenos.module';
+import { IngredientesModule } from './ingredientes/ingredientes.module';
 
 // Importamos las "Entidades".
 // Piensa en las Entidades como los "planos" de tus tablas.
@@ -48,6 +49,7 @@ import { Ingredient } from '../../../libs/common/src/entities/ms-productos/ingre
     ProductosModule,  // Maneja la lógica de crear/editar productos.
     CategoriasModule, // Maneja las categorías.
     AlergenosModule,  // Maneja los alérgenos.
+    IngredientesModule, // Maneja los ingredientes.
   ],
   controllers: [], // (Vacío porque este es solo el módulo principal, los controladores están en los sub-módulos)
   providers: [],

@@ -4,26 +4,31 @@ import { ClientProxy } from '@nestjs/microservices';
 import { CreateProductDto, UpdateProductDto } from '@app/common';
 import { MS_PRODUCTS } from '../../config/service';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
-
+import { extname, join } from 'path';
+import { existsSync, mkdirSync } from 'fs';
 @Controller('gestion/productos')
 export class GatewayProductosController {
   constructor(@Inject(MS_PRODUCTS) private readonly productsClient: ClientProxy) {}
 
-  // 👇 NUEVA RUTA: Recibe un archivo, lo guarda y devuelve su URL final
+  // 👇 RUTA BLINDADA: Crea la carpeta si no existe y guarda en la raíz exacta
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', {
     storage: diskStorage({
-      destination: './uploads', // La carpeta donde se guardarán físicamente
+      destination: (req, file, cb) => {
+        const uploadPath = join(process.cwd(), 'uploads');
+        // Magia: Si la carpeta no existe, la crea sola
+        if (!existsSync(uploadPath)) {
+          mkdirSync(uploadPath, { recursive: true });
+        }
+        cb(null, uploadPath);
+      },
       filename: (req, file, cb) => {
-        // Le damos un nombre único aleatorio para evitar sobreescrituras
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         const ext = extname(file.originalname);
         cb(null, `img-${uniqueSuffix}${ext}`);
       }
     }),
     fileFilter: (req, file, cb) => {
-      // Seguridad: Solo permitimos imágenes
       if (!file.mimetype.match(/\/(jpg|jpeg|png|webp|avif)$/)) {
         return cb(new BadRequestException('Solo se permiten archivos de imagen'), false);
       }
@@ -34,7 +39,6 @@ export class GatewayProductosController {
     if (!file) {
       throw new BadRequestException('No se ha subido ningún archivo');
     }
-    // Devolvemos la ruta donde el navegador podrá encontrar la foto
     const fileUrl = `http://localhost:3005/uploads/${file.filename}`;
     return { url: fileUrl };
   }
