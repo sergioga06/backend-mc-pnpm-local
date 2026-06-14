@@ -1,11 +1,7 @@
-import { IsString, IsNotEmpty, IsArray, IsUUID } from 'class-validator';
+import { IsString, IsNotEmpty } from 'class-validator';
 
 export class CreateRoleDto {
   @IsString()
   @IsNotEmpty()
   name: string;
-
-  @IsArray()
-  @IsUUID('4', { each: true })
-  permisoIds?: string[];
 }

@@ -7,7 +7,6 @@ import { KitchenGateway } from '../../websocket/kitchen.gateway';
 import { firstValueFrom } from 'rxjs';
 
 @Controller('gestion/pedidos')
-@UseGuards(JwtAuthGuard, RolesGuard) // 🛡️ Bloquea todo el controlador pidiendo Login
 export class GatewayOrdersController {
   constructor(
     @Inject(MS_ORDERS) private readonly ordersClient: ClientProxy,
@@ -15,7 +14,6 @@ export class GatewayOrdersController {
   ) {}
 
   @Post()
-  @Roles(UserRole.ADMIN, UserRole.CAMARERO, UserRole.COCINERO) // 🛡️ Los 3 pueden crear comandas
   async create(@Body() createOrderDto: CreateOrderDto) {
     const newOrder = await firstValueFrom(
       this.ordersClient.send({ cmd: 'create_order' }, createOrderDto)
@@ -25,6 +23,7 @@ export class GatewayOrdersController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.CAMARERO, UserRole.COCINERO) // 🛡️ Los 3 pueden ver comandas
   findAll() {
     return this.ordersClient.send({ cmd: 'find_all_orders' }, {});
