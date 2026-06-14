@@ -1,20 +1,17 @@
-import { Controller, Post, Body, Get, Inject, Param, Patch, Delete, Query } from '@nestjs/common';
+import { Controller, Post, Body, Get, Inject, Param, Patch, Delete, Query, UseGuards } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { CreateCategoryDto, UpdateCategoryDto } from '@app/common';
+import { CreateCategoryDto, UpdateCategoryDto, Roles, UserRole } from '@app/common';
+import { JwtAuthGuard } from '@app/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@app/common/guards/roles.guard';
 import { MS_PRODUCTS } from '../../config/service';
 
 @Controller('gestion/categorias')
 export class GatewayCategoriasController {
   constructor(@Inject(MS_PRODUCTS) private readonly productsClient: ClientProxy) {}
 
-  @Get('menu') // Endpoint especial para la carta pública
+  @Get('menu') 
   getMenu() {
     return this.productsClient.send({ cmd: 'get_menu' }, {});
-  }
-
-  @Post()
-  create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.productsClient.send({ cmd: 'create_category' }, createCategoryDto);
   }
 
   @Get()
@@ -27,12 +24,24 @@ export class GatewayCategoriasController {
     return this.productsClient.send({ cmd: 'find_one_category' }, id);
   }
 
+  // 🔴 MÉTODOS PROTEGIDOS
+  @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  create(@Body() createCategoryDto: CreateCategoryDto) {
+    return this.productsClient.send({ cmd: 'create_category' }, createCategoryDto);
+  }
+
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
     return this.productsClient.send({ cmd: 'update_category' }, { id, updateCategoryDto });
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   remove(@Param('id') id: string) {
     return this.productsClient.send({ cmd: 'remove_category' }, id);
   }

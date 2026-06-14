@@ -1,22 +1,44 @@
-import { Controller, Post, Body, Inject, Get } from '@nestjs/common';
+import { Controller, Post, Body, Inject, Get, Patch, Param, Delete, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { CreateUserDto } from '@app/common';
-import { MS_USERS } from '../../config/service'; // Asegúrate de que este export exista o usa el string 'MS_USERS'
+import { catchError, throwError } from 'rxjs';
+import { CreateUserDto, UpdateUserDto, Roles, UserRole } from '@app/common';
+import { JwtAuthGuard } from '@app/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@app/common/guards/roles.guard';
+import { MS_USERS } from '../../config/service';
 
 @Controller('gestion/usuarios')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN)
 export class GestionUsuariosController {
   constructor(@Inject(MS_USERS) private readonly usersClient: ClientProxy) {}
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
-    // Envía el comando 'create_user' que tu microservicio ya está escuchando
-    return this.usersClient.send({ cmd: 'create_user' }, createUserDto);
+    return this.usersClient.send({ cmd: 'create_user' }, createUserDto)
+      .pipe(catchError(err => throwError(() => new HttpException(err.message, err.statusCode || HttpStatus.INTERNAL_SERVER_ERROR))));
   }
   
   @Get()
-    findAll() {
-      return this.usersClient.send({ cmd: 'find_all_users' }, {});
-    }
+  findAll() {
+    return this.usersClient.send({ cmd: 'find_all_users' }, {})
+      .pipe(catchError(err => throwError(() => new HttpException(err.message, err.statusCode || HttpStatus.INTERNAL_SERVER_ERROR))));
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.usersClient.send({ cmd: 'find_one_user' }, id)
+      .pipe(catchError(err => throwError(() => new HttpException(err.message, err.statusCode || HttpStatus.INTERNAL_SERVER_ERROR))));
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersClient.send({ cmd: 'update_user' }, { id, updateUserDto })
+      .pipe(catchError(err => throwError(() => new HttpException(err.message, err.statusCode || HttpStatus.INTERNAL_SERVER_ERROR))));
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.usersClient.send({ cmd: 'remove_user' }, id)
+      .pipe(catchError(err => throwError(() => new HttpException(err.message, err.statusCode || HttpStatus.INTERNAL_SERVER_ERROR))));
+  }
 }
-
-
