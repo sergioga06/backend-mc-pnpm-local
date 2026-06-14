@@ -3,20 +3,21 @@ import { JwtModule } from '@nestjs/jwt';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
+import { envs } from '../config/envs'; // 👈 Importamos las variables de entorno
 
 @Module({
   imports: [
-    // La máquina de hacer Tokens
+    // La máquina de hacer Tokens (¡Ahora conectada al .env!)
     JwtModule.register({
-      secret: 'SECRETO_SUPER_SEGURO_TITO_2026', // En producción, esto irá en el .env
-      signOptions: { expiresIn: '8h' }, // El token caduca en 8 horas
+      secret: envs.jwtSecret, // 👈 Secreto unificado
+      signOptions: { expiresIn: '8h' }, 
     }),
     // Conexión con el validador (ms-usuarios)
     ClientsModule.register([
       {
         name: 'MS_USUARIOS',
         transport: Transport.NATS,
-        options: { servers: ['nats://localhost:4222'] },
+        options: { servers: envs.natsServers }, // 👈 Aprovechamos para usar el NATS del .env
       },
     ]),
   ],

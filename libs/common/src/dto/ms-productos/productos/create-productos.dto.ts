@@ -6,7 +6,20 @@ import {
   IsArray,
   Min,
   IsUUID,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+
+// 1. Definimos las reglas exactas para el contenido de los Extras
+export class ExtraItemDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsNumber()
+  @Min(0)
+  price: number;
+}
 
 export class CreateProductDto {
   @IsString()
@@ -22,6 +35,7 @@ export class CreateProductDto {
   @Min(0)
   price: number;
 
+  // ✅ PERFECTO: La imagen ya tiene su pase VIP
   @IsString()
   @IsOptional()
   image?: string;
@@ -32,16 +46,18 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsArray()
-  @IsUUID('4', { each: true }) 
-  allergenIds?: string[];      
+  @IsUUID('4', { each: true })
+  allergenIds?: string[];
 
   @IsOptional()
   @IsArray()
   @IsUUID('4', { each: true })
   ingredientIds?: string[];
 
-  // 👇 PERMISO DE ENTRADA: Le decimos a NestJS que acepte la lista de extras
+  // ✅ CORREGIDO: Ahora NestJS validará y aceptará el interior de los extras
   @IsOptional()
   @IsArray()
-  extras?: { name: string, price: number }[];
+  @ValidateNested({ each: true })
+  @Type(() => ExtraItemDto)
+  extras?: ExtraItemDto[];
 }

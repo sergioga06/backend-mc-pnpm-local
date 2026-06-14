@@ -16,6 +16,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: any) {
     console.log("DEBUG: Token decodificado correctamente:", payload);
-    return { id: payload.id, role: payload.role, email: payload.email };
+    return { id: payload.sub, role: payload.role, email: payload.email };
   }
 }
