@@ -25,8 +25,10 @@ import { KitchenGateway } from './websocket/kitchen.gateway';
 
 import { JwtStrategy } from './modulos/ms-auth/jwt.strategy';
 import { GatewayAuthController} from './modulos/ms-auth/auth.controller';
+import { PassportModule } from '@nestjs/passport'; // 👈 IMPORTANTE
 @Module({
   imports: [
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     // 👇 NUEVO: Hacemos que la carpeta "uploads" sea pública en internet
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'),

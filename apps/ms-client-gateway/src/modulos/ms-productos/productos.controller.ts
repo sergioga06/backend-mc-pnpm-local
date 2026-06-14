@@ -2,7 +2,9 @@ import { Controller, Post, Body, Get, Inject, Param, Patch, Delete, Query, UseIn
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ClientProxy } from '@nestjs/microservices';
 // 👇 Importamos las herramientas de seguridad
-import { CreateProductDto, UpdateProductDto, JwtAuthGuard, RolesGuard, Roles, UserRole } from '@app/common';
+import { CreateProductDto, UpdateProductDto, Roles, UserRole } from '@app/common';
+import { JwtAuthGuard } from '@app/common/guards/jwt-auth.guard'; // Importación correcta
+import { RolesGuard } from '@app/common/guards/roles.guard';
 import { MS_PRODUCTS } from '../../config/service';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';

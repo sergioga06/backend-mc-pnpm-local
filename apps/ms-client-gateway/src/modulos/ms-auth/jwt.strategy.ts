@@ -7,19 +7,15 @@ import { envs } from '../../config/envs';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
     super({
-      // 1. Le decimos que extraiga el token del Header (Bearer Token)
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      // 2. Le decimos que no acepte tokens caducados
       ignoreExpiration: false,
-      // 3. Le damos la llave maestra para comprobar la firma
       secretOrKey: envs.jwtSecret, 
     });
+    console.log("DEBUG [JwtStrategy]: Secreto cargado:", envs.jwtSecret?.substring(0, 4) + "...");
   }
 
-  // Si la firma es correcta, Passport ejecuta esta función automáticamente
   async validate(payload: any) {
-    // Lo que devuelvas aquí, se inyectará en la petición (Request) 
-    // y es lo que leerá nuestro RolesGuard para saber si es ADMIN o CAMARERO
+    console.log("DEBUG: Token decodificado correctamente:", payload);
     return { id: payload.id, role: payload.role, email: payload.email };
   }
 }
