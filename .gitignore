@@ -2,7 +2,9 @@
 /dist
 /node_modules
 /build
-
+# Archivos subidos por los usuarios
+/uploads
+uploads/
 # Logs
 logs
 *.log
