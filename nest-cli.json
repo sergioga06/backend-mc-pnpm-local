@@ -61,7 +61,6 @@
       "entryFile": "main",
       "sourceRoot": "apps/ms-auth/src",
       "compilerOptions": {
-        "webpack": true,
         "tsConfigPath": "apps/ms-auth/tsconfig.app.json"
       }
     },

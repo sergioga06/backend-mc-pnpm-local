@@ -1,22 +1,25 @@
-import { Controller, Post, Body, Get, Inject, Param, Patch, Delete, Query, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, Get, Inject, Param, Patch, Delete, Query, UseInterceptors, UploadedFile, BadRequestException, UseGuards } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ClientProxy } from '@nestjs/microservices';
-import { CreateProductDto, UpdateProductDto } from '@app/common';
+// 👇 Importamos las herramientas de seguridad
+import { CreateProductDto, UpdateProductDto, JwtAuthGuard, RolesGuard, Roles, UserRole } from '@app/common';
 import { MS_PRODUCTS } from '../../config/service';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
+
 @Controller('gestion/productos')
+@UseGuards(JwtAuthGuard, RolesGuard) // 🛡️ Bloquea todo el controlador pidiendo Login
 export class GatewayProductosController {
   constructor(@Inject(MS_PRODUCTS) private readonly productsClient: ClientProxy) {}
 
-  // 👇 RUTA BLINDADA: Crea la carpeta si no existe y guarda en la raíz exacta
+  // 👇 RUTA BLINDADA: Solo el jefe puede subir fotos
   @Post('upload')
+  @Roles(UserRole.ADMIN) 
   @UseInterceptors(FileInterceptor('file', {
     storage: diskStorage({
       destination: (req, file, cb) => {
         const uploadPath = join(process.cwd(), 'uploads');
-        // Magia: Si la carpeta no existe, la crea sola
         if (!existsSync(uploadPath)) {
           mkdirSync(uploadPath, { recursive: true });
         }
@@ -46,16 +49,19 @@ export class GatewayProductosController {
   // --- RESTO DE RUTAS NORMALES ---
 
   @Post()
+  @Roles(UserRole.ADMIN) // 🛡️ Solo el jefe crea productos
   create(@Body() createProductDto: CreateProductDto) {
     return this.productsClient.send({ cmd: 'create_product' }, createProductDto);
   }
 
   @Get()
+  // Sin @Roles para que cualquier empleado logueado pueda verlos
   findAll(@Query('includeInactive') includeInactive: string) {
     return this.productsClient.send({ cmd: 'find_all_products' }, includeInactive === 'true');
   }
 
   @Get('buscar')
+  // Sin @Roles para que puedan buscar en el TPV
   search(@Query('q') query: string) {
     return this.productsClient.send({ cmd: 'search_products' }, query);
   }
@@ -71,16 +77,19 @@ export class GatewayProductosController {
   }
 
   @Patch(':id')
+  @Roles(UserRole.ADMIN) // 🛡️ Solo el jefe edita
   update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
     return this.productsClient.send({ cmd: 'update_product' }, { id, updateProductDto });
   }
 
   @Patch(':id/toggle')
+  @Roles(UserRole.ADMIN) // 🛡️ Solo el jefe los activa/desactiva
   toggle(@Param('id') id: string) {
     return this.productsClient.send({ cmd: 'toggle_product_availability' }, id);
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN) // 🛡️ Solo el jefe borra
   remove(@Param('id') id: string) {
     return this.productsClient.send({ cmd: 'remove_product' }, id);
   }

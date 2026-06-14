@@ -23,6 +23,7 @@ import { GatewayQrController } from './modulos/ms-qr-codes/qr-code.controller';
 import { GatewayOrdersController } from './modulos/ms-orders/orders.controller';
 import { KitchenGateway } from './websocket/kitchen.gateway';
 
+import { JwtStrategy } from './modulos/ms-auth/jwt.strategy';
 import { GatewayAuthController} from './modulos/ms-auth/auth.controller';
 @Module({
   imports: [
@@ -83,6 +84,7 @@ import { GatewayAuthController} from './modulos/ms-auth/auth.controller';
   providers: [
     AppService,
     KitchenGateway,
+    JwtStrategy
   ],
 })
 export class AppModule {}

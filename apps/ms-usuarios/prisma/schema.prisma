@@ -33,25 +33,10 @@ model Role {
   isActive  Boolean   @default(true)
 
   users     User[]    @relation("UserRoles") 
-  permisos  Permiso[] @relation("RolePermisos")
+  
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
   @@map("roles")
-}
-
-model Permiso {
-  id        String   @id @default(uuid())
-  name      String
-  slug      String   @unique 
-  action    String   
-  resource  String   
-  isActive  Boolean  @default(true)
-
-  roles     Role[]   @relation("RolePermisos")
-
-  createdAt DateTime @default(now())
-
-  @@map("permisos")
 }

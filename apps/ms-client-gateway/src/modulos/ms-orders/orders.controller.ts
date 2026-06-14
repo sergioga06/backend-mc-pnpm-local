@@ -1,11 +1,13 @@
-import { Controller, Post, Body, Get, Patch, Param, Inject } from '@nestjs/common';
+import { Controller, Post, Body, Get, Patch, Param, Inject, UseGuards } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { CreateOrderDto } from '@app/common';
+// 👇 Importamos las herramientas de seguridad
+import { CreateOrderDto, JwtAuthGuard, RolesGuard, Roles, UserRole } from '@app/common';
 import { MS_ORDERS } from '../../config/service'; 
 import { KitchenGateway } from '../../websocket/kitchen.gateway';
 import { firstValueFrom } from 'rxjs';
 
 @Controller('gestion/pedidos')
+@UseGuards(JwtAuthGuard, RolesGuard) // 🛡️ Bloquea todo el controlador pidiendo Login
 export class GatewayOrdersController {
   constructor(
     @Inject(MS_ORDERS) private readonly ordersClient: ClientProxy,
@@ -13,6 +15,7 @@ export class GatewayOrdersController {
   ) {}
 
   @Post()
+  @Roles(UserRole.ADMIN, UserRole.CAMARERO, UserRole.COCINERO) // 🛡️ Los 3 pueden crear comandas
   async create(@Body() createOrderDto: CreateOrderDto) {
     const newOrder = await firstValueFrom(
       this.ordersClient.send({ cmd: 'create_order' }, createOrderDto)
@@ -22,12 +25,14 @@ export class GatewayOrdersController {
   }
 
   @Get()
+  @Roles(UserRole.ADMIN, UserRole.CAMARERO, UserRole.COCINERO) // 🛡️ Los 3 pueden ver comandas
   findAll() {
     return this.ordersClient.send({ cmd: 'find_all_orders' }, {});
   }
 
   // --- LO NUEVO: CAMBIAR ESTADO ---
   @Patch(':id/status')
+  @Roles(UserRole.ADMIN, UserRole.CAMARERO, UserRole.COCINERO) // 🛡️ Los 3 pueden actualizar estados
   async updateStatus(
     @Param('id') id: string,
     @Body('status') status: string // Ej: 'IN_PROGRESS', 'DELIVERED', 'PAID'
